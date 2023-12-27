@@ -8,12 +8,16 @@ Goal is to be able to access data in such easy way like a NumPy array allows to.
 ## Future work
 [ ] Simple view for 1D sequence
 [ ] Simple view for 2D sequence
-[ ] Generalize for N-D sequences
+[ ] Add support for arithmetic, boolean operations
 [ ] Access data with fixed step
 [ ] Access data with mask
 [ ] Modify data with single value assignement
 [ ] Modify data view -> view
 [ ] Modify data view(mask) -> view(mask)
+[ ] Generalize for N-D sequences
+[ ] Lazy masks - compute on demand
+[ ] Convert data type
+[ ] Simple algorithms - max/min/avg(global/dims), find, find_if
 
 ## Examples (TBD) 
 
@@ -37,6 +41,7 @@ v = o; // Views size match
 auto mask = view > 10; // mask for large elements
 other(mask) = view(mask); // copy elements to other matrix
 view(mask) = 0; // zero elements
+view(view == 3).begin().base(); // returns iterator of first item, then convert to base view
 auto max_elements = SeqView::max(other, view); // custom algorithm
 auto other_with_max = other; // just copy
 other_with_max(other < max) = max; // not sure if that will be confusing or not
