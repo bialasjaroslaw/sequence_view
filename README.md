@@ -6,18 +6,18 @@ I want a simple, portable and C++20 (or even C++17) compatible way of accesing c
 Goal is to be able to access data in such easy way like a NumPy array allows to.
 
 ## Future work
-[ ] Simple view for 1D sequence
-[ ] Simple view for 2D sequence
-[ ] Add support for arithmetic, boolean operations
-[ ] Access data with fixed step
-[ ] Access data with mask
-[ ] Modify data with single value assignement
-[ ] Modify data view -> view
-[ ] Modify data view(mask) -> view(mask)
-[ ] Generalize for N-D sequences
-[ ] Lazy masks - compute on demand
-[ ] Convert data type
-[ ] Simple algorithms - max/min/avg(global/dims), find, find_if
+* [ ] Simple view for 1D sequence
+* [ ] Simple view for 2D sequence
+* [ ] Add support for arithmetic, boolean operations
+* [ ] Access data with fixed step
+* [ ] Access data with mask
+* [ ] Modify data with single value assignement
+* [ ] Modify data view -> view
+* [ ] Modify data view(mask) -> view(mask)
+* [ ] Generalize for N-D sequences
+* [ ] Lazy masks - compute on demand
+* [ ] Convert data type
+* [ ] Simple algorithms - max/min/avg(global/dims), find, find_if
 
 ## Examples (TBD) 
 
