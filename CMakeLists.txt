@@ -102,6 +102,8 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
         common.cc
     )
 
-    target_link_libraries(main PRIVATE sequence_view gtest_main gmock)
+    find_package(fmt REQUIRED)
+
+    target_link_libraries(main PRIVATE sequence_view gtest_main gmock fmt::fmt)
     gtest_discover_tests(main)
 endif()
