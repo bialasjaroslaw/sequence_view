@@ -6,10 +6,14 @@ I want a simple, portable and C++20 (or even C++17) compatible way of accesing c
 Goal is to be able to access data in such easy way like a NumPy array allows to.
 
 ## Future work
-* [ ] Simple view for 1D sequence
+* [X] Simple view for 1D sequence
 * [ ] Simple view for 2D sequence
 * [ ] Add support for arithmetic, boolean operations
-* [ ] Access data with fixed step
+* [X] Add range - begin/end
+* [ ] Add support for STL algorithms
+* [X] Allow for subviews
+* [X] Access data with fixed step
+* [X] Access data with negative step (reversed iterations)
 * [ ] Access data with mask
 * [ ] Modify data with single value assignement
 * [ ] Modify data view -> view
