@@ -40,36 +40,149 @@ namespace SeqView{
 	};
 
 	template <typename T>
+	struct BaseIterator{
+		BaseIterator(T* data, int64_t step = STEP)
+		: _data(data)
+		, _step(step)
+		, _dstep(step < 0 ? step : 0)
+		{}
+
+		const T& operator*() const {
+			return *ptr();
+		}
+
+		const T* operator->() const{
+			return ptr();
+		}
+		
+		friend bool operator==(const BaseIterator<T>& lhs, const BaseIterator<T>& rhs){
+			return lhs._data == rhs._data;
+		}
+
+		friend bool operator!=(const BaseIterator<T>& lhs, const BaseIterator<T>& rhs){
+			return lhs._data != rhs._data;
+		}
+		
+		BaseIterator& operator++(){
+			_data += _step;
+			return *this;
+		}
+
+		BaseIterator operator+(int steps){
+			return BaseIterator<T>(_data + _step * steps, _step);
+		}
+	protected:
+		T* ptr(){
+			return _data + _dstep;
+		}
+		const T* ptr() const{
+			return _data + _dstep;
+		}
+	private:
+		T* _data = nullptr;
+		int64_t _step = STEP;
+		int64_t _dstep = 0;
+	};
+
+	template <typename T>
+	struct Iterator : BaseIterator<T>{
+		Iterator(T* data, int64_t step = STEP) 
+		: BaseIterator<T>(data, step)
+		{}
+
+		T& operator*(){
+			return *BaseIterator<T>::ptr();
+		}
+
+		T* operator->(){
+			return BaseIterator<T>::ptr();
+		}
+	};
+
+	template <typename T>
+	struct ConstIterator : BaseIterator<T>{
+		ConstIterator(T* data, int64_t step = STEP) 
+		: BaseIterator<T>(data, step)
+		{}
+	};
+
+	template <typename T>
 	class View{
 	public:
 		using size_type = std::size_t;
         using value_type = T;
         using pointer = T*;
         using const_pointer = T const*;
+        using iterator = Iterator<T>;
+        using const_iterator = ConstIterator<T>;
         using reference = T&;
         using const_reference = T const&;
 
-		View(T* ptr, uint64_t size, int64_t step = 1)
-		: _ptr(ptr)
-		, _step(step == 0 ? step = 1 : step)
-		, _size(size)
+        constexpr static int64_t validate_step(int64_t step){
+        	if(step == 0)
+        		return 1;
+        	return step;
+        }
+
+        constexpr static uint64_t elements(uint64_t size, int64_t step){
+        	if(size == 0 || step == 0)
+        		return 0;
+        	step = std::abs(step);
+        	if(step > size)
+        		return 1;
+        	return (size - 1) / step + 1;
+        }
+
+        constexpr static pointer last_ptr(pointer ptr, uint64_t size, int64_t step){
+        	auto number_of_jumps = elements(size, step);
+        	auto first_outside_boundary = number_of_jumps * std::abs(step);
+        	return ptr + first_outside_boundary;
+        }
+
+		constexpr static pointer base_ptr(pointer ptr, uint64_t size, int64_t step){
+        	if(step > 0)
+        		return ptr;
+        	return last_ptr(ptr, size, step);
+        }
+
+        constexpr static pointer end_ptr(pointer ptr, uint64_t size, int64_t step){
+        	if(step < 0)
+        		return ptr;
+        	return last_ptr(ptr, size, step);
+        }
+
+		View(pointer ptr, uint64_t size, int64_t step = 1)
+		: _ptr(base_ptr(ptr, size, step))
+		, _end(end_ptr(ptr, size, step))
+		, _step(validate_step(step))
+		, _size(elements(size, step))
 		{}
 
 		uint64_t size() const{
-			return _size / std::abs(_step);
-		}
-		pointer begin(){
-			return _ptr;
-		}
-		pointer end(){
-			return _ptr + _size;
+			return _size;
 		}
 
-		const_pointer begin() const {
-			return _ptr;
+		iterator begin(){
+			return iterator(_ptr, _step);
 		}
-		const_pointer end() const {
-			return _ptr + _size;
+		
+		iterator end(){
+			return iterator(_end, _step);
+		}
+
+		const_iterator begin() const {
+			return const_iterator(_ptr, _step);
+		}
+		
+		const_iterator end() const {
+			return const_iterator(_end, _step);
+		}
+
+		const_iterator cbegin() const {
+			return const_iterator(_ptr, _step);
+		}
+		const_iterator cend() const {
+			return const_iterator(_end, _step);
 		}
 
 		View operator()(Range rng) {
@@ -77,16 +190,23 @@ namespace SeqView{
 		}
 
 		reference operator[](uint64_t idx){
-			return *(_ptr + idx * _step);
+			return *element_at(idx);
 		}
 
 		const_reference operator[](uint64_t idx) const{
-			return *(_ptr + idx * _step);
+			return* element_at(idx);
+		}
+
+	protected:
+
+		T* element_at(int idx) const {
+			return _ptr + idx * _step + (_step < 0 ? _step : 0);
 		}
 
 	private:
-		pointer _ptr = nullptr;
 		int64_t _step;
 		uint64_t _size = 0;
+		pointer _ptr = nullptr;
+		pointer _end = nullptr;
 	};
 }
