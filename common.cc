@@ -192,3 +192,29 @@ TEST(Common, IterateWithNegativeStep) {
     EXPECT_THAT(sub[view_idx], Eq(data[idx]));
   }
 }
+
+TEST(Common, ForEachLoop) {
+  uint64_t data[100];
+  init_range(data, 100);
+  SeqView::View view(data, 100);
+  auto sub = view(SeqView::Range{10, 20, 2});
+  EXPECT_THAT(sub, SizeIs(5));
+  int64_t idx = 10;
+  for(auto& elem : sub){
+    EXPECT_THAT(elem, Eq(data[idx]));
+    idx += 2;
+  }
+}
+
+TEST(Common, ForEachLoopReversed) {
+  uint64_t data[100];
+  init_range(data, 100);
+  SeqView::View view(data, 100);
+  auto sub = view(SeqView::Range{10, 20, -2});
+  EXPECT_THAT(sub, SizeIs(5));
+  int64_t idx = 18;
+  for(auto& elem : sub){
+    EXPECT_THAT(elem, Eq(data[idx]));
+    idx -= 2;
+  }
+}
