@@ -102,8 +102,13 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
         common.cc
     )
 
-    find_package(fmt REQUIRED)
+    FetchContent_Declare(
+      fmt
+      GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+      GIT_TAG        f5e54359df4c26b6230fc61d38aa294581393084
+    )
+    FetchContent_MakeAvailable(fmt)
 
-    target_link_libraries(main PRIVATE sequence_view gtest_main gmock fmt::fmt)
+    target_link_libraries(main PRIVATE sequence_view gtest_main gmock fmt)
     gtest_discover_tests(main)
 endif()
