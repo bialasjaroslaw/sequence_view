@@ -10,7 +10,7 @@ Goal is to be able to access data in such easy way like a NumPy array allows to.
 * [ ] Simple view for 2D sequence
 * [ ] Add support for arithmetic, boolean operations
 * [X] Add range - begin/end
-* [ ] Add support for STL algorithms
+* [X] Add support for STL algorithms
 * [X] Allow for subviews
 * [X] Access data with fixed step
 * [X] Access data with negative step (reversed iterations)

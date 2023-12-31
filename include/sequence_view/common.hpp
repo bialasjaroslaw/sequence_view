@@ -1,14 +1,18 @@
 #pragma once
 
+#include <fmt/printf.h>
+
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <span>
 
 namespace SeqView {
 using RangeT = int64_t;
 constexpr RangeT START = 0;
 constexpr RangeT END = std::numeric_limits<RangeT>::max();
 constexpr RangeT STEP = 1;
+constexpr RangeT MASK = 0;
 
 struct Range {
   Range(RangeT start, RangeT stop, RangeT step = STEP)
@@ -30,6 +34,41 @@ struct StopRange : Range {
   StopRange(RangeT stop, RangeT step = STEP) : Range(START, stop, step) {}
 };
 
+struct MaskInfo {
+  const uint8_t* ptr = nullptr;
+  const uint8_t* begin = nullptr;
+  const uint8_t* end = nullptr;
+
+  MaskInfo() {}
+
+  MaskInfo(const std::vector<uint8_t>& span)
+      : ptr(&*span.begin()), begin(&*span.begin()), end(&*span.end()) {}
+
+  int64_t next(int64_t steps = 1) const {
+    fmt::print("Calc for idx {}\n", steps);
+    if (steps < 0) return previous(-steps);
+    auto current = ptr;
+    while (current != end && steps != 0) {
+      if (*++current) --steps;
+    }
+    return current - ptr;
+  }
+
+  int64_t previous(int64_t steps = 1) const {
+    if (steps < 0) return next(-steps);
+    auto current = ptr;
+    while (current != begin && steps != 0) {
+      if (*--current) --steps;
+    }
+    return ptr - current;
+  }
+
+  MaskInfo& operator+=(int64_t jump) {
+    ptr += jump;
+    return *this;
+  }
+};
+
 template <typename T>
 struct BaseIterator {
   using iterator_category = std::random_access_iterator_tag;
@@ -38,8 +77,8 @@ struct BaseIterator {
   using pointer = T*;
   using reference = T&;
 
-  BaseIterator(T* data, int64_t step = STEP)
-      : _data(data), _step(step), _dstep(step < 0 ? step : 0) {}
+  BaseIterator(T* data, int64_t step = STEP, MaskInfo mask = {})
+      : _data(data), _step(step), _dstep(step < 0 ? step : 0), _mask(mask) {}
 
   const T& operator*() const { return *ptr(); }
 
@@ -61,28 +100,29 @@ struct BaseIterator {
   }
 
   BaseIterator& operator++() {
-    _data += _step;
+    next_advance();
     return *this;
   }
 
   BaseIterator& operator--() {
-    _data -= _step;
+    previous_advance();
     return *this;
   }
 
-  BaseIterator operator+(int steps) {
-    return BaseIterator<T>(_data + _step * steps, _step);
+  BaseIterator operator+(int steps) const {
+    return BaseIterator<T>(next(steps), _step);
   }
 
   BaseIterator operator+=(int steps) {
-    _data += _step * steps;
+    next_advance(steps);
     return *this;
   }
 
-  BaseIterator operator-(int steps) {
-    return BaseIterator<T>(_data - _step * steps, _step);
+  BaseIterator operator-(int steps) const {
+    return BaseIterator<T>(previous(steps), _step);
   }
 
+  // TODO fix for mask
   friend int64_t operator-(const BaseIterator<T>& lhs,
                            const BaseIterator<T>& rhs) {
     return (lhs._data + lhs._dstep - rhs._data - rhs._dstep) / lhs._step;
@@ -100,10 +140,41 @@ struct BaseIterator {
   T* ptr() { return _data + _dstep; }
   const T* ptr() const { return _data + _dstep; }
 
+  pointer next(int64_t steps = 1) const {
+    auto jump = _step != MASK ? steps * _step : next_mask(steps);
+    return _data + jump;
+  }
+
+  pointer previous(int64_t steps = 1) const {
+    auto jump = _step != MASK ? steps * _step : previous_mask(steps);
+    return _data - jump;
+  }
+
+  pointer next_advance(int64_t steps = 1) {
+    auto ptr = next(steps);
+    _mask += (ptr - _data);
+    _data = ptr;
+    return _data;
+  }
+
+  pointer previous_advance(int64_t steps = 1) {
+    auto ptr = previous(steps);
+    _mask += (ptr - _data);
+    _data = ptr;
+    return _data;
+  }
+
+  int64_t next_mask(int64_t steps = 1) const { return _mask.next(steps); }
+
+  int64_t previous_mask(int64_t steps = 1) const {
+    return _mask.previous(steps);
+  }
+
  private:
   T* _data = nullptr;
   int64_t _step = STEP;
   int64_t _dstep = 0;
+  MaskInfo _mask;
 };
 
 template <typename T>
@@ -152,6 +223,13 @@ class View {
         _step(validate_step(step)),
         _size(elements(size, step)) {}
 
+  View(pointer ptr, std::vector<uint8_t> mask)
+      : _ptr(ptr),
+        _end(ptr + mask.size()),
+        _step(MASK),
+        _size(std::count(mask.cbegin(), mask.cend(), true)),
+        _mask(std::move(mask)) {}
+
   uint64_t size() const { return _size; }
 
   iterator begin() { return iterator(_ptr, _step); }
@@ -169,12 +247,25 @@ class View {
     return View(_ptr + rng.start, rng.stop - rng.start, rng.step);
   }
 
+  View operator()(const std::vector<uint8_t>& mask) { return View(_ptr, mask); }
+
   reference operator[](uint64_t idx) { return *element_at(idx); }
 
   const_reference operator[](uint64_t idx) const { return *element_at(idx); }
 
+  friend std::vector<bool> operator<(const View& view, const T& val) {
+    std::vector<bool> mask;
+    mask.resize(view.size());
+    uint64_t idx = 0;
+    for (const auto& elem : view) mask[idx++] = elem < val;
+    return mask;
+  }
+
  protected:
   T* element_at(int idx) const {
+    if (_step == MASK) {
+      return _ptr + MaskInfo(_mask).next(idx);
+    }
     return _ptr + idx * _step + (_step < 0 ? _step : 0);
   }
 
@@ -183,5 +274,6 @@ class View {
   uint64_t _size = 0;
   pointer _ptr = nullptr;
   pointer _end = nullptr;
+  std::vector<uint8_t> _mask;
 };
 }  // namespace SeqView

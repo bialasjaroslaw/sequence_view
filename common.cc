@@ -8,7 +8,9 @@
 
 using namespace ::testing;
 
-void init_range(uint64_t* ptr, uint64_t len) { std::iota(ptr, ptr + len, 0); }
+static void init_range(uint64_t* ptr, uint64_t len) {
+  std::iota(ptr, ptr + len, 0);
+}
 
 TEST(ViewHelpers, ValidateStep) {
   std::vector<int64_t> input{-2, -1, 0, 1, 2};

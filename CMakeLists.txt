@@ -100,6 +100,7 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
 
     add_executable(main 
         common.cc
+        mask.cc
     )
 
     FetchContent_Declare(
