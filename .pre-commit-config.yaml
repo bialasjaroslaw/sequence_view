@@ -1,0 +1,13 @@
+hooks:
+  - &clang-format
+    id: clang-format
+    name: clang-format
+    entry: clang-format -i
+    language: python
+    'types_or': [c++, c, c#, cuda, java, javascript, json, objective-c, proto, textproto]
+
+repos:
+  - repo: local
+    hooks:
+      - <<: *clang-format
+        args: ["-style=Google"]
