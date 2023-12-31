@@ -278,3 +278,22 @@ TEST(Common, CheckStlStablePartition) {
     EXPECT_THAT(data[idx], Eq(expected[idx]));
   }
 }
+
+TEST(Common, CheckStlFind) {
+  uint64_t data[] = {3, 6, 1, 5, 4, 3, 5, 1};
+  SeqView::View view(data, 8);
+  auto sub = view(SeqView::Range{0, 8, 2});
+  auto rev_sub = view(SeqView::Range{1, 8, -2});
+  EXPECT_THAT(std::find(sub.begin(), sub.end(), 5).base() - sub.begin().base(),
+              Eq(6));
+  EXPECT_THAT(std::find(rev_sub.begin(), rev_sub.end(), 5).base() -
+                  rev_sub.end().base(),
+              Eq(4));
+}
+
+TEST(Common, CheckStlCount) {
+  uint64_t data[] = {3, 6, 1, 5, 4, 3, 5, 1};
+  SeqView::View view(data, 8);
+  auto sub = view(SeqView::Range{0, 8, 2});
+  EXPECT_THAT(std::count(sub.begin(), sub.end(), 3), Eq(1));
+}

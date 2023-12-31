@@ -92,6 +92,10 @@ struct BaseIterator {
 
   T* operator->() { return BaseIterator<T>::ptr(); }
 
+  T* base() { return BaseIterator<T>::ptr(); }
+
+  const T* base() const { return BaseIterator<T>::ptr(); }
+
  protected:
   T* ptr() { return _data + _dstep; }
   const T* ptr() const { return _data + _dstep; }
