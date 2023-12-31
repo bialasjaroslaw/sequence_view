@@ -32,6 +32,12 @@ struct StopRange : Range {
 
 template <typename T>
 struct BaseIterator {
+  using iterator_category = std::random_access_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = T;
+  using pointer = T*;
+  using reference = T&;
+
   BaseIterator(T* data, int64_t step = STEP)
       : _data(data), _step(step), _dstep(step < 0 ? step : 0) {}
 
@@ -49,14 +55,42 @@ struct BaseIterator {
     return lhs._data != rhs._data;
   }
 
+  friend bool operator<(const BaseIterator<T>& lhs,
+                        const BaseIterator<T>& rhs) {
+    return lhs._data < rhs._data;
+  }
+
   BaseIterator& operator++() {
     _data += _step;
+    return *this;
+  }
+
+  BaseIterator& operator--() {
+    _data -= _step;
     return *this;
   }
 
   BaseIterator operator+(int steps) {
     return BaseIterator<T>(_data + _step * steps, _step);
   }
+
+  BaseIterator operator+=(int steps) {
+    _data += _step * steps;
+    return *this;
+  }
+
+  BaseIterator operator-(int steps) {
+    return BaseIterator<T>(_data - _step * steps, _step);
+  }
+
+  friend int64_t operator-(const BaseIterator<T>& lhs,
+                           const BaseIterator<T>& rhs) {
+    return (lhs._data + lhs._dstep - rhs._data - rhs._dstep) / lhs._step;
+  }
+
+  T& operator*() { return *BaseIterator<T>::ptr(); }
+
+  T* operator->() { return BaseIterator<T>::ptr(); }
 
  protected:
   T* ptr() { return _data + _dstep; }
@@ -69,28 +103,14 @@ struct BaseIterator {
 };
 
 template <typename T>
-struct Iterator : BaseIterator<T> {
-  Iterator(T* data, int64_t step = STEP) : BaseIterator<T>(data, step) {}
-
-  T& operator*() { return *BaseIterator<T>::ptr(); }
-
-  T* operator->() { return BaseIterator<T>::ptr(); }
-};
-
-template <typename T>
-struct ConstIterator : BaseIterator<T> {
-  ConstIterator(T* data, int64_t step = STEP) : BaseIterator<T>(data, step) {}
-};
-
-template <typename T>
 class View {
  public:
   using size_type = std::size_t;
   using value_type = T;
   using pointer = T*;
   using const_pointer = T const*;
-  using iterator = Iterator<T>;
-  using const_iterator = ConstIterator<T>;
+  using iterator = BaseIterator<T>;
+  using const_iterator = const BaseIterator<T>;
   using reference = T&;
   using const_reference = T const&;
 
