@@ -56,7 +56,7 @@ struct MaskInfo {
       : ptr(&*span.begin()),
         begin(&*span.begin()),
         end(&*span.end()),
-        cnt(std::count(span.begin(), span.end(), true)),
+        cnt(std::count(span.begin(), span.end(), 1)),
         valid_until(init_valid(span)) {}
 
   int64_t next(int64_t steps = 1) const {
@@ -291,7 +291,7 @@ class View {
     std::vector<uint8_t> mask;
     mask.resize(view.size());
     uint64_t idx = 0;
-    for (const auto& elem : view) mask[idx++] = elem < val;
+    for (const auto& elem : view) mask[idx++] = elem < val ? 1 : 0;
     return mask;
   }
 
