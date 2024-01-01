@@ -225,9 +225,9 @@ class View {
 
   constexpr static uint64_t elements(uint64_t size, int64_t step) {
     if (size == 0 || step == 0) return 0;
-    step = std::abs(step);
-    if (step > size) return 1;
-    return (size - 1) / step + 1;
+    uint64_t step_abs = std::abs(step);
+    if (step_abs > size) return 1;
+    return (size - 1) / step_abs + 1;
   }
 
   constexpr static pointer last_ptr(pointer ptr, uint64_t size, int64_t step) {
@@ -296,7 +296,7 @@ class View {
   }
 
  protected:
-  T* element_at(int idx) const {
+  T* element_at(uint64_t idx) const {
     if (_step == MASK) {
       return _ptr + _info.next(idx);
     }
