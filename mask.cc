@@ -14,8 +14,8 @@ static void init_range(uint64_t* ptr, uint64_t len) {
 
 TEST(SubView, MakeMaskFromComparison) {
   uint64_t data[] = {1, 3, 7, 5, 4, 2, 1, 3, 6, 8};
-  bool expected[] = {true, true, false, false, true,
-                     true, true, true,  false, false};
+  uint8_t expected[] = {true, true, false, false, true,
+                        true, true, true,  false, false};
 
   SeqView::View view(data, 10);
   auto mask = view < 5;
