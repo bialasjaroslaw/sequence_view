@@ -108,10 +108,6 @@ struct BaseIterator {
   BaseIterator(T* data, int64_t step = STEP, MaskInfo mask = {})
       : _data(data), _step(step), _dstep(step < 0 ? step : 0), _mask(mask) {}
 
-  const T& operator*() const { return *ptr(); }
-
-  const T* operator->() const { return ptr(); }
-
   friend bool operator==(const BaseIterator<T>& lhs,
                          const BaseIterator<T>& rhs) {
     return lhs._data == rhs._data;
@@ -157,17 +153,12 @@ struct BaseIterator {
                : (lhs._data + lhs._dstep - rhs._data - rhs._dstep) / lhs._step;
   }
 
-  T& operator*() { return *BaseIterator<T>::ptr(); }
-
-  T* operator->() { return BaseIterator<T>::ptr(); }
-
-  T* base() { return BaseIterator<T>::ptr(); }
-
-  const T* base() const { return BaseIterator<T>::ptr(); }
+  reference operator*() const { return *ptr(); }
+  pointer operator->() const { return ptr(); }
+  pointer base() const { return ptr(); }
 
  protected:
-  T* ptr() { return _data + _dstep; }
-  const T* ptr() const { return _data + _dstep; }
+  T* ptr() const { return _data + _dstep; }
 
   pointer next(int64_t steps = 1) const {
     auto jump = _step != MASK ? steps * _step : next_mask(steps);
