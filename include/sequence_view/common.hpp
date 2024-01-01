@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fmt/printf.h>
-
 #include <cmath>
 #include <cstdint>
 #include <limits>
@@ -38,14 +36,30 @@ struct MaskInfo {
   const uint8_t* ptr = nullptr;
   const uint8_t* begin = nullptr;
   const uint8_t* end = nullptr;
+  uint64_t cnt = 0;
+  std::vector<uint64_t> valid_until;
+
+  static std::vector<uint64_t> init_valid(const std::vector<uint8_t>& span) {
+    std::vector<uint64_t> valids;
+    valids.resize(span.size() + 1);
+    uint64_t totals = 0;
+    for (uint64_t idx = 0; idx < span.size(); ++idx) {
+      totals += span[idx];
+      valids[idx + 1] = totals;
+    }
+    return valids;
+  }
 
   MaskInfo() {}
 
   MaskInfo(const std::vector<uint8_t>& span)
-      : ptr(&*span.begin()), begin(&*span.begin()), end(&*span.end()) {}
+      : ptr(&*span.begin()),
+        begin(&*span.begin()),
+        end(&*span.end()),
+        cnt(std::count(span.begin(), span.end(), true)),
+        valid_until(init_valid(span)) {}
 
   int64_t next(int64_t steps = 1) const {
-    fmt::print("Calc for idx {}\n", steps);
     if (steps < 0) return previous(-steps);
     auto current = ptr;
     while (current != end && steps != 0) {
@@ -63,9 +77,23 @@ struct MaskInfo {
     return ptr - current;
   }
 
+  uint64_t valid() const { return valid_until[ptr - begin]; }
+
   MaskInfo& operator+=(int64_t jump) {
     ptr += jump;
     return *this;
+  }
+
+  MaskInfo operator+(int64_t jump) const {
+    auto copy = *this;
+    copy += jump;
+    return copy;
+  }
+
+  uint64_t count() const { return cnt; }
+
+  bool good() const {
+    return ptr != nullptr && begin != nullptr && end != nullptr;
   }
 };
 
@@ -122,10 +150,11 @@ struct BaseIterator {
     return BaseIterator<T>(previous(steps), _step);
   }
 
-  // TODO fix for mask
   friend int64_t operator-(const BaseIterator<T>& lhs,
                            const BaseIterator<T>& rhs) {
-    return (lhs._data + lhs._dstep - rhs._data - rhs._dstep) / lhs._step;
+    return lhs._mask.good()
+               ? lhs._mask.valid() - rhs._mask.valid()
+               : (lhs._data + lhs._dstep - rhs._data - rhs._dstep) / lhs._step;
   }
 
   T& operator*() { return *BaseIterator<T>::ptr(); }
@@ -228,20 +257,25 @@ class View {
         _end(ptr + mask.size()),
         _step(MASK),
         _size(std::count(mask.cbegin(), mask.cend(), true)),
+        _info(mask),
         _mask(std::move(mask)) {}
 
-  uint64_t size() const { return _size; }
+  uint64_t size() const { return _step != MASK ? _size : _info.count(); }
 
-  iterator begin() { return iterator(_ptr, _step); }
+  iterator begin() { return iterator(_ptr, _step, _info); }
 
-  iterator end() { return iterator(_end, _step); }
+  iterator end() { return iterator(_end, _step, _info + (_end - _ptr)); }
 
-  const_iterator begin() const { return const_iterator(_ptr, _step); }
+  const_iterator begin() const { return const_iterator(_ptr, _step, _info); }
 
-  const_iterator end() const { return const_iterator(_end, _step); }
+  const_iterator end() const {
+    return const_iterator(_end, _step, _info + (_end - _ptr));
+  }
 
-  const_iterator cbegin() const { return const_iterator(_ptr, _step); }
-  const_iterator cend() const { return const_iterator(_end, _step); }
+  const_iterator cbegin() const { return const_iterator(_ptr, _step, _info); }
+  const_iterator cend() const {
+    return const_iterator(_end, _step, _info + (_end - _ptr));
+  }
 
   View operator()(Range rng) {
     return View(_ptr + rng.start, rng.stop - rng.start, rng.step);
@@ -253,8 +287,8 @@ class View {
 
   const_reference operator[](uint64_t idx) const { return *element_at(idx); }
 
-  friend std::vector<bool> operator<(const View& view, const T& val) {
-    std::vector<bool> mask;
+  friend std::vector<uint8_t> operator<(const View& view, const T& val) {
+    std::vector<uint8_t> mask;
     mask.resize(view.size());
     uint64_t idx = 0;
     for (const auto& elem : view) mask[idx++] = elem < val;
@@ -264,7 +298,7 @@ class View {
  protected:
   T* element_at(int idx) const {
     if (_step == MASK) {
-      return _ptr + MaskInfo(_mask).next(idx);
+      return _ptr + _info.next(idx);
     }
     return _ptr + idx * _step + (_step < 0 ? _step : 0);
   }
@@ -274,6 +308,7 @@ class View {
   uint64_t _size = 0;
   pointer _ptr = nullptr;
   pointer _end = nullptr;
+  MaskInfo _info;
   std::vector<uint8_t> _mask;
 };
 }  // namespace SeqView
