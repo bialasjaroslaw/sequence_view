@@ -256,8 +256,8 @@ class View {
       : _ptr(ptr),
         _end(ptr + mask.size()),
         _step(MASK),
-        _size(std::count(mask.cbegin(), mask.cend(), true)),
         _info(mask),
+        _size(_info.count()),
         _mask(std::move(mask)) {}
 
   uint64_t size() const { return _step != MASK ? _size : _info.count(); }
