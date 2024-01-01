@@ -14,7 +14,8 @@ Goal is to be able to access data in such easy way like a NumPy array allows to.
 * [X] Allow for subviews
 * [X] Access data with fixed step
 * [X] Access data with negative step (reversed iterations)
-* [ ] Access data with mask
+* [X] Access data with mask
+* [ ] Handle unnecessary data copy when mask is shared between iterators (begin/end)
 * [ ] Modify data with single value assignement
 * [ ] Modify data view -> view
 * [ ] Modify data view(mask) -> view(mask)
