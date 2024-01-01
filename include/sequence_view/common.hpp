@@ -214,6 +214,8 @@ class View {
   using pointer = T*;
   using const_pointer = T const*;
   using iterator = BaseIterator<T>;
+  // TODO, fix type for const_iterator (iterator can be modified, access can not
+  // modify values)
   using const_iterator = const BaseIterator<T>;
   using reference = T&;
   using const_reference = T const&;
@@ -262,15 +264,9 @@ class View {
 
   uint64_t size() const { return _step != MASK ? _size : _info.count(); }
 
-  iterator begin() { return iterator(_ptr, _step, _info); }
+  iterator begin() const { return iterator(_ptr, _step, _info); }
 
-  iterator end() { return iterator(_end, _step, _info + (_end - _ptr)); }
-
-  const_iterator begin() const { return const_iterator(_ptr, _step, _info); }
-
-  const_iterator end() const {
-    return const_iterator(_end, _step, _info + (_end - _ptr));
-  }
+  iterator end() const { return iterator(_end, _step, _info + (_end - _ptr)); }
 
   const_iterator cbegin() const { return const_iterator(_ptr, _step, _info); }
   const_iterator cend() const {
