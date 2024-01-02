@@ -8,10 +8,6 @@
 
 using namespace ::testing;
 
-static void init_range(uint64_t* ptr, uint64_t len) {
-  std::iota(ptr, ptr + len, 0);
-}
-
 TEST(SubView, MakeMaskFromComparison) {
   uint64_t data[] = {1, 3, 7, 5, 4, 2, 1, 3, 6, 8};
   uint8_t expected[] = {true, true, false, false, true,

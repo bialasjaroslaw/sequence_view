@@ -62,8 +62,10 @@ struct MaskInfo {
   int64_t next(int64_t steps = 1) const {
     if (steps < 0) return previous(-steps);
     auto current = ptr;
-    while (current != end && steps != 0) {
-      if (*++current) --steps;
+    while (steps != 0) {
+      if (++current == end)
+        break;
+      if (*current == MASK_TRUE) --steps;
     }
     return current - ptr;
   }
