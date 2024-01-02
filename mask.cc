@@ -16,7 +16,7 @@ TEST(SubView, MakeMaskFromComparison) {
   SeqView::View view(data, 10);
   auto mask = view < 5;
 
-  for (auto idx = 0; idx < mask.size(); ++idx)
+  for (auto idx = 0U; idx < mask.size(); ++idx)
     EXPECT_THAT(mask[idx], Eq(expected[idx]))
         << fmt::format("Failed for {}/{}", idx, data[idx]);
 }
@@ -39,7 +39,7 @@ TEST(SubView, SubViewWithMask) {
   SeqView::View view(data, 8);
   auto sub = view(mask);
   EXPECT_THAT(sub.size(), Eq(6));
-  for (auto idx = 0; idx < sub.size(); ++idx)
+  for (auto idx = 0U; idx < sub.size(); ++idx)
     EXPECT_THAT(sub[idx], Eq(expected[idx]))
         << fmt::format("Failed for idx {}", idx);
 }
@@ -53,8 +53,9 @@ TEST(SubView, SubViewWithIteratorsAndMask) {
   auto sub = view(mask);
   EXPECT_THAT(sub.size(), Eq(6));
   EXPECT_THAT(sub.end() - sub.begin(), Eq(6));
-  int64_t idx = 0;
-  for (auto it = sub.begin(); it != sub.end(); ++it, ++idx)
+  uint64_t idx = 0;
+  for (auto it = sub.begin(); it != sub.end(); ++it, ++idx) {
     EXPECT_THAT(*it, Eq(expected[idx]))
         << fmt::format("Failed for idx {}", idx);
+  }
 }

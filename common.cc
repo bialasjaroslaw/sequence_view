@@ -16,7 +16,7 @@ TEST(ViewHelpers, ValidateStep) {
   std::vector<int64_t> input{-2, -1, 0, 1, 2};
   std::vector<int64_t> expected{-2, -1, 1, 1, 2};
 
-  for (auto idx = 0; idx < input.size(); ++idx)
+  for (auto idx = 0U; idx < input.size(); ++idx)
     EXPECT_THAT(SeqView::View<uint64_t>::validate_step(input[idx]),
                 Eq(expected[idx]))
         << fmt::format("Failed for {}", input[idx]);
@@ -30,7 +30,7 @@ TEST(ViewHelpers, Elements) {
   std::vector<int64_t> expected{0, 0, 1, 1, 3, 4, 4, 4, 5,
                                 5, 5, 6, 6, 5, 3, 4, 4, 4};
 
-  for (auto idx = 0; idx < input_size.size(); ++idx)
+  for (auto idx = 0U; idx < input_size.size(); ++idx)
     EXPECT_THAT(
         SeqView::View<uint64_t>::elements(input_size[idx], input_step[idx]),
         Eq(expected[idx]))
@@ -50,7 +50,7 @@ TEST(ViewHelpers, LastPtr) {
       PC(0),  PC(0),  PC(1),  PC(2),  PC(9),  PC(12), PC(12), PC(12), PC(15),
       PC(10), PC(10), PC(12), PC(12), PC(10), PC(9),  PC(12), PC(12), PC(12)};
 
-  for (auto idx = 0; idx < input_size.size(); ++idx) {
+  for (auto idx = 0U; idx < input_size.size(); ++idx) {
     EXPECT_THAT(SeqView::View<uint16_t>::last_ptr(ptr, input_size[idx],
                                                   input_step[idx]),
                 Eq(expected[idx]))
@@ -72,7 +72,7 @@ TEST(ViewHelpers, BasePtr) {
                                   PC(0), PC(0),  PC(0), PC(0),  PC(0),  PC(0),
                                   PC(0), PC(10), PC(9), PC(12), PC(12), PC(12)};
 
-  for (auto idx = 0; idx < input_size.size(); ++idx) {
+  for (auto idx = 0U; idx < input_size.size(); ++idx) {
     EXPECT_THAT(SeqView::View<uint16_t>::base_ptr(ptr, input_size[idx],
                                                   input_step[idx]),
                 Eq(expected[idx]))
@@ -94,7 +94,7 @@ TEST(ViewHelpers, EndPtr) {
       PC(0),  PC(0),  PC(1),  PC(2),  PC(9), PC(12), PC(12), PC(12), PC(15),
       PC(10), PC(10), PC(12), PC(12), PC(0), PC(0),  PC(0),  PC(0),  PC(0)};
 
-  for (auto idx = 0; idx < input_size.size(); ++idx) {
+  for (auto idx = 0U; idx < input_size.size(); ++idx) {
     EXPECT_THAT(
         SeqView::View<uint16_t>::end_ptr(ptr, input_size[idx], input_step[idx]),
         Eq(expected[idx]))
@@ -105,51 +105,58 @@ TEST(ViewHelpers, EndPtr) {
 
 TEST(Common, MakeRange) {
   SeqView::Range rng(12, 23, 2);
-  EXPECT_THAT(rng.start, Eq(12));
-  EXPECT_THAT(rng.stop, Eq(23));
-  EXPECT_THAT(rng.step, Eq(2));
+  EXPECT_THAT(rng.start(), Eq(12));
+  EXPECT_THAT(rng.stop(), Eq(23));
+  EXPECT_THAT(rng.step(), Eq(2));
+}
+
+TEST(Common, MakeRangeReversedArgs) {
+  SeqView::Range rng(23, 12, 2);
+  EXPECT_THAT(rng.start(), Eq(12));
+  EXPECT_THAT(rng.stop(), Eq(23));
+  EXPECT_THAT(rng.step(), Eq(2));
 }
 
 TEST(Common, MakeRangeDefaultStep) {
   SeqView::Range rng(12, 23);
-  EXPECT_THAT(rng.start, Eq(12));
-  EXPECT_THAT(rng.stop, Eq(23));
-  EXPECT_THAT(rng.step, Eq(SeqView::STEP));
+  EXPECT_THAT(rng.start(), Eq(12));
+  EXPECT_THAT(rng.stop(), Eq(23));
+  EXPECT_THAT(rng.step(), Eq(SeqView::STEP));
 }
 
 TEST(Common, MakeStartRange) {
   SeqView::StartRange rng(12, 2);
-  EXPECT_THAT(rng.start, Eq(12));
-  EXPECT_THAT(rng.stop, Eq(SeqView::END));
-  EXPECT_THAT(rng.step, Eq(2));
+  EXPECT_THAT(rng.start(), Eq(12));
+  EXPECT_THAT(rng.stop(), Eq(SeqView::END));
+  EXPECT_THAT(rng.step(), Eq(2));
 }
 
 TEST(Common, MakeStartRangeDefaultStep) {
   SeqView::StartRange rng(12);
-  EXPECT_THAT(rng.start, Eq(12));
-  EXPECT_THAT(rng.stop, Eq(SeqView::END));
-  EXPECT_THAT(rng.step, Eq(SeqView::STEP));
+  EXPECT_THAT(rng.start(), Eq(12));
+  EXPECT_THAT(rng.stop(), Eq(SeqView::END));
+  EXPECT_THAT(rng.step(), Eq(SeqView::STEP));
 }
 
 TEST(Common, MakeStopRange) {
   SeqView::StopRange rng(12, 2);
-  EXPECT_THAT(rng.start, Eq(SeqView::START));
-  EXPECT_THAT(rng.stop, Eq(12));
-  EXPECT_THAT(rng.step, Eq(2));
+  EXPECT_THAT(rng.start(), Eq(SeqView::START));
+  EXPECT_THAT(rng.stop(), Eq(12));
+  EXPECT_THAT(rng.step(), Eq(2));
 }
 
 TEST(Common, MakeStopRangeDefaultStep) {
   SeqView::StopRange rng(12);
-  EXPECT_THAT(rng.start, Eq(SeqView::START));
-  EXPECT_THAT(rng.stop, Eq(12));
-  EXPECT_THAT(rng.step, Eq(SeqView::STEP));
+  EXPECT_THAT(rng.start(), Eq(SeqView::START));
+  EXPECT_THAT(rng.stop(), Eq(12));
+  EXPECT_THAT(rng.step(), Eq(SeqView::STEP));
 }
 
 TEST(Common, MakeStepRange) {
   SeqView::StepRange rng(2);
-  EXPECT_THAT(rng.start, Eq(SeqView::START));
-  EXPECT_THAT(rng.stop, Eq(SeqView::END));
-  EXPECT_THAT(rng.step, Eq(2));
+  EXPECT_THAT(rng.start(), Eq(SeqView::START));
+  EXPECT_THAT(rng.stop(), Eq(SeqView::END));
+  EXPECT_THAT(rng.step(), Eq(2));
 }
 
 TEST(Common, Make1DView) {
@@ -179,7 +186,7 @@ TEST(Common, IterateWithStep) {
   SeqView::View view(data, 100);
   auto sub = view(SeqView::Range{10, 20, 2});
   EXPECT_THAT(sub, SizeIs(5));
-  for (int64_t idx = 10, view_idx = 0; idx < 20; idx += 2, ++view_idx) {
+  for (uint64_t idx = 10, view_idx = 0; idx < 20; idx += 2, ++view_idx) {
     EXPECT_THAT(sub[view_idx], Eq(data[idx]));
   }
 }
@@ -190,7 +197,7 @@ TEST(Common, IterateWithNegativeStep) {
   SeqView::View view(data, 100);
   auto sub = view(SeqView::Range{10, 20, -2});
   EXPECT_THAT(sub, SizeIs(5));
-  for (int64_t idx = 18, view_idx = 0; idx > 8; idx -= 2, ++view_idx) {
+  for (uint64_t idx = 18, view_idx = 0; idx > 8; idx -= 2, ++view_idx) {
     EXPECT_THAT(sub[view_idx], Eq(data[idx]));
   }
 }
@@ -234,8 +241,7 @@ TEST(Common, CheckStlSort) {
     auto sub = view(SeqView::Range{0, 8, -2});
     EXPECT_FALSE(std::is_sorted(std::begin(sub), std::end(sub)));
     std::sort(std::begin(sub), std::end(sub));
-    int64_t idx = 0;
-    for (int64_t idx = 0; idx < 8; ++idx) {
+    for (uint64_t idx = 0; idx < 8; ++idx) {
       EXPECT_THAT(data[idx], Eq(expected[idx]));
     }
   }

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <limits>
 #include <span>
+#include <vector>
 
 namespace SeqView {
 using RangeT = int64_t;
@@ -11,13 +12,22 @@ constexpr RangeT START = 0;
 constexpr RangeT END = std::numeric_limits<RangeT>::max();
 constexpr RangeT STEP = 1;
 constexpr RangeT MASK = 0;
+using MaskT = uint8_t;
+constexpr MaskT MASK_TRUE = 1;
+constexpr MaskT MASK_FALSE = 0;
 
 struct Range {
   Range(RangeT start, RangeT stop, RangeT step = STEP)
-      : start(start), stop(stop), step(step) {}
-  RangeT start = START;
-  RangeT stop = END;
-  RangeT step = STEP;
+      : _start(start), _stop(stop), _step(step) {
+    if (_start > _stop) std::swap(_start, _stop);
+  }
+  RangeT _start = START;
+  RangeT _stop = END;
+  RangeT _step = STEP;
+
+  RangeT start() const { return _start; }
+  RangeT stop() const { return _stop; }
+  RangeT step() const { return _step; }
 };
 
 struct StepRange : Range {
@@ -33,13 +43,13 @@ struct StopRange : Range {
 };
 
 struct MaskInfo {
-  const uint8_t* ptr = nullptr;
-  const uint8_t* begin = nullptr;
-  const uint8_t* end = nullptr;
+  const MaskT* ptr = nullptr;
+  const MaskT* begin = nullptr;
+  const MaskT* end = nullptr;
   uint64_t cnt = 0;
   std::vector<uint64_t> valid_until;
 
-  static std::vector<uint64_t> init_valid(const std::vector<uint8_t>& span) {
+  static std::vector<uint64_t> init_valid(const std::vector<MaskT>& span) {
     std::vector<uint64_t> valids;
     valids.resize(span.size() + 1);
     uint64_t totals = 0;
@@ -56,22 +66,20 @@ struct MaskInfo {
       : ptr(&*span.begin()),
         begin(&*span.begin()),
         end(&*span.end()),
-        cnt(std::count(span.begin(), span.end(), 1)),
+        cnt(static_cast<uint64_t>(
+            std::count(span.begin(), span.end(), MASK_TRUE))),
         valid_until(init_valid(span)) {}
 
-  int64_t next(int64_t steps = 1) const {
-    if (steps < 0) return previous(-steps);
+  int64_t next(uint64_t steps = 1) const {
     auto current = ptr;
     while (steps != 0) {
-      if (++current == end)
-        break;
+      if (++current == end) break;
       if (*current == MASK_TRUE) --steps;
     }
     return current - ptr;
   }
 
-  int64_t previous(int64_t steps = 1) const {
-    if (steps < 0) return next(-steps);
+  int64_t previous(uint64_t steps = 1) const {
     auto current = ptr;
     while (current != begin && steps != 0) {
       if (*--current) --steps;
@@ -79,7 +87,9 @@ struct MaskInfo {
     return ptr - current;
   }
 
-  uint64_t valid() const { return valid_until[ptr - begin]; }
+  uint64_t valid() const {
+    return valid_until[static_cast<uint64_t>(ptr - begin)];
+  }
 
   MaskInfo& operator+=(int64_t jump) {
     ptr += jump;
@@ -136,22 +146,28 @@ struct BaseIterator {
   }
 
   BaseIterator operator+(int steps) const {
-    return BaseIterator<T>(next(steps), _step);
+    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
+    return BaseIterator<T>(steps >= 0 ? next(steps_abs) : previous(steps_abs),
+                           _step);
   }
 
   BaseIterator operator+=(int steps) {
-    next_advance(steps);
+    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
+    steps > 0 ? next_advance(steps_abs) : previous_advance(steps_abs);
     return *this;
   }
 
   BaseIterator operator-(int steps) const {
-    return BaseIterator<T>(previous(steps), _step);
+    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
+    return BaseIterator<T>(steps >= 0 ? previous(steps_abs) : next(steps_abs),
+                           _step);
   }
 
   friend int64_t operator-(const BaseIterator<T>& lhs,
                            const BaseIterator<T>& rhs) {
     return lhs._mask.good()
-               ? lhs._mask.valid() - rhs._mask.valid()
+               ? static_cast<int64_t>(lhs._mask.valid()) -
+                     static_cast<int64_t>(rhs._mask.valid())
                : (lhs._data + lhs._dstep - rhs._data - rhs._dstep) / lhs._step;
   }
 
@@ -162,33 +178,35 @@ struct BaseIterator {
  protected:
   T* ptr() const { return _data + _dstep; }
 
-  pointer next(int64_t steps = 1) const {
-    auto jump = _step != MASK ? steps * _step : next_mask(steps);
+  pointer next(uint64_t steps = 1) const {
+    auto jump =
+        _step != MASK ? static_cast<int64_t>(steps) * _step : next_mask(steps);
     return _data + jump;
   }
 
-  pointer previous(int64_t steps = 1) const {
-    auto jump = _step != MASK ? steps * _step : previous_mask(steps);
+  pointer previous(uint64_t steps = 1) const {
+    auto jump = _step != MASK ? static_cast<int64_t>(steps) * _step
+                              : previous_mask(steps);
     return _data - jump;
   }
 
-  pointer next_advance(int64_t steps = 1) {
+  pointer next_advance(uint64_t steps = 1) {
     auto ptr = next(steps);
     _mask += (ptr - _data);
     _data = ptr;
     return _data;
   }
 
-  pointer previous_advance(int64_t steps = 1) {
+  pointer previous_advance(uint64_t steps = 1) {
     auto ptr = previous(steps);
     _mask += (ptr - _data);
     _data = ptr;
     return _data;
   }
 
-  int64_t next_mask(int64_t steps = 1) const { return _mask.next(steps); }
+  int64_t next_mask(uint64_t steps = 1) const { return _mask.next(steps); }
 
-  int64_t previous_mask(int64_t steps = 1) const {
+  int64_t previous_mask(uint64_t steps = 1) const {
     return _mask.previous(steps);
   }
 
@@ -220,14 +238,15 @@ class View {
 
   constexpr static uint64_t elements(uint64_t size, int64_t step) {
     if (size == 0 || step == 0) return 0;
-    uint64_t step_abs = std::abs(step);
+    uint64_t step_abs = static_cast<uint64_t>(std::abs(step));
     if (step_abs > size) return 1;
     return (size - 1) / step_abs + 1;
   }
 
   constexpr static pointer last_ptr(pointer ptr, uint64_t size, int64_t step) {
     auto number_of_jumps = elements(size, step);
-    auto first_outside_boundary = number_of_jumps * std::abs(step);
+    auto first_outside_boundary =
+        number_of_jumps * static_cast<uint64_t>(std::abs(step));
     return ptr + first_outside_boundary;
   }
 
@@ -252,8 +271,9 @@ class View {
         _end(ptr + mask.size()),
         _step(MASK),
         _info(mask),
-        _size(_info.count()),
-        _mask(std::move(mask)) {}
+        _mask(std::move(mask)) {
+    _size = _info.count();
+  }
 
   uint64_t size() const { return _step != MASK ? _size : _info.count(); }
 
@@ -267,7 +287,10 @@ class View {
   }
 
   View operator()(Range rng) {
-    return View(_ptr + rng.start, rng.stop - rng.start, rng.step);
+    return rng._start > rng._stop
+               ? View(_ptr + rng._start, 0, rng._step)
+               : View(_ptr + rng._start,
+                      static_cast<uint64_t>(rng._stop - rng._start), rng._step);
   }
 
   View operator()(const std::vector<uint8_t>& mask) { return View(_ptr, mask); }
@@ -280,7 +303,8 @@ class View {
     std::vector<uint8_t> mask;
     mask.resize(view.size());
     uint64_t idx = 0;
-    for (const auto& elem : view) mask[idx++] = elem < val ? 1 : 0;
+    for (const auto& elem : view)
+      mask[idx++] = elem < val ? MASK_TRUE : MASK_FALSE;
     return mask;
   }
 
@@ -289,14 +313,14 @@ class View {
     if (_step == MASK) {
       return _ptr + _info.next(idx);
     }
-    return _ptr + idx * _step + (_step < 0 ? _step : 0);
+    return _ptr + static_cast<int64_t>(idx) * _step + (_step < 0 ? _step : 0);
   }
 
  private:
-  int64_t _step;
-  uint64_t _size = 0;
   pointer _ptr = nullptr;
   pointer _end = nullptr;
+  int64_t _step = 1;
+  uint64_t _size = 0;
   MaskInfo _info;
   std::vector<uint8_t> _mask;
 };
