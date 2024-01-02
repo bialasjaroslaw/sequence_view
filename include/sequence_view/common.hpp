@@ -119,8 +119,44 @@ struct BaseIterator {
   using pointer = T*;
   using reference = T&;
 
+  BaseIterator() = default;
+
   BaseIterator(T* data, int64_t step = STEP, MaskInfo mask = {})
       : _data(data), _step(step), _dstep(step < 0 ? step : 0), _mask(mask) {}
+
+  BaseIterator& operator++() {
+    next_advance();
+    return *this;
+  }
+
+  BaseIterator operator++(int) {
+    auto copy = *this;
+    operator++();
+    return copy;
+  }
+
+  BaseIterator& operator--() {
+    previous_advance();
+    return *this;
+  }
+
+  BaseIterator operator--(int) {
+    auto copy = *this;
+    operator--();
+    return copy;
+  }
+
+  BaseIterator& operator+=(difference_type steps) {
+    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
+    steps > 0 ? next_advance(steps_abs) : previous_advance(steps_abs);
+    return *this;
+  }
+
+  BaseIterator& operator-=(difference_type steps) {
+    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
+    steps > 0 ? previous_advance(steps_abs) : next_advance(steps_abs);
+    return *this;
+  }
 
   friend bool operator==(const BaseIterator<T>& lhs,
                          const BaseIterator<T>& rhs) {
@@ -129,52 +165,60 @@ struct BaseIterator {
 
   friend bool operator!=(const BaseIterator<T>& lhs,
                          const BaseIterator<T>& rhs) {
-    return lhs._data != rhs._data;
+    return !(lhs == rhs);
   }
 
   friend bool operator<(const BaseIterator<T>& lhs,
                         const BaseIterator<T>& rhs) {
-    return lhs._data < rhs._data;
+    return lhs._step > 0 ? lhs._data < rhs._data : lhs._data > rhs._data;
   }
 
-  BaseIterator& operator++() {
-    next_advance();
-    return *this;
+  friend bool operator>(const BaseIterator<T>& lhs,
+                        const BaseIterator<T>& rhs) {
+    return rhs < lhs;
   }
 
-  BaseIterator& operator--() {
-    previous_advance();
-    return *this;
+  friend bool operator<=(const BaseIterator<T>& lhs,
+                         const BaseIterator<T>& rhs) {
+    return !(rhs < lhs);
   }
 
-  BaseIterator operator+(int steps) const {
+  friend bool operator>=(const BaseIterator<T>& lhs,
+                         const BaseIterator<T>& rhs) {
+    return !(lhs < rhs);
+  }
+
+  friend BaseIterator operator+(const BaseIterator& it, difference_type steps) {
+    auto copy = it;
+    copy += steps;
+    return copy;
+  }
+
+  friend BaseIterator operator+(difference_type steps, const BaseIterator& it) {
+    return it + steps;
+  }
+
+  friend BaseIterator operator-(const BaseIterator& it, difference_type steps) {
     uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
-    return BaseIterator<T>(steps >= 0 ? next(steps_abs) : previous(steps_abs),
-                           _step);
+    return BaseIterator<T>(
+        steps >= 0 ? it.previous(steps_abs) : it.next(steps_abs), it._step);
   }
 
-  BaseIterator operator+=(int steps) {
-    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
-    steps > 0 ? next_advance(steps_abs) : previous_advance(steps_abs);
-    return *this;
-  }
-
-  BaseIterator operator-(int steps) const {
-    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
-    return BaseIterator<T>(steps >= 0 ? previous(steps_abs) : next(steps_abs),
-                           _step);
-  }
-
-  friend int64_t operator-(const BaseIterator<T>& lhs,
-                           const BaseIterator<T>& rhs) {
+  friend difference_type operator-(const BaseIterator<T>& lhs,
+                                   const BaseIterator<T>& rhs) {
     return lhs._mask.good()
-               ? static_cast<int64_t>(lhs._mask.valid()) -
-                     static_cast<int64_t>(rhs._mask.valid())
+               ? static_cast<difference_type>(lhs._mask.valid()) -
+                     static_cast<difference_type>(rhs._mask.valid())
                : (lhs._data + lhs._dstep - rhs._data - rhs._dstep) / lhs._step;
   }
 
   reference operator*() const { return *ptr(); }
   pointer operator->() const { return ptr(); }
+  reference operator[](difference_type steps) const {
+    uint64_t steps_abs = static_cast<uint64_t>(std::abs(steps));
+    if (steps < 0) return *(previous(steps_abs) + _dstep);
+    return *(next(steps_abs) + _dstep);
+  }  // TODO Check
   pointer base() const { return ptr(); }
 
  protected:

@@ -48,6 +48,14 @@ if(DEVELOPER_BUILD)
         set(ENABLE_STACK_PROTECTION "ENABLE_STACK_PROTECTION")
         set(ENABLE_OVERFLOW_PROTECTION "ENABLE_OVERFLOW_PROTECTION")
         set(WARNINGS_AS_ERRORS "WARNINGS_AS_ERRORS")
+        target_compile_definitions(sequence_view INTERFACE 
+            _GLIBCXX_CONCEPT_CHECKS 
+            _GLIBCXX_ASSERTIONS 
+            _GLIBCXX_DEBUG 
+            _GLIBCXX_DEBUG_PEDANTIC
+            _GLIBCXX_DEBUG_BACKTRACE
+            _GLIBCXX_SANITIZE_VECTOR
+        )
     else()
         set(ENABLE_GCC_ANALYZER "")
         set(GCC_WARNINGS "")
