@@ -54,8 +54,8 @@ struct MaskInfo {
     valids.resize(span.size() + 1);
     uint64_t totals = 0;
     for (uint64_t idx = 0; idx < span.size(); ++idx) {
-      totals += span[idx];
-      valids[idx + 1] = totals;
+      totals += span.at(idx);
+      valids.at(idx + 1) = totals;
     }
     return valids;
   }
@@ -71,6 +71,7 @@ struct MaskInfo {
         valid_until(init_valid(span)) {}
 
   int64_t next(uint64_t steps = 1) const {
+    if (ptr == end) return 0;
     auto current = ptr;
     while (steps != 0) {
       if (++current == end) break;
@@ -81,14 +82,15 @@ struct MaskInfo {
 
   int64_t previous(uint64_t steps = 1) const {
     auto current = ptr;
-    while (current != begin && steps != 0) {
-      if (*--current) --steps;
+    while (steps != 0 && current != begin) {
+      --current;
+      if (*current == MASK_TRUE) --steps;
     }
     return ptr - current;
   }
 
   uint64_t valid() const {
-    return valid_until[static_cast<uint64_t>(ptr - begin)];
+    return valid_until.at(static_cast<uint64_t>(ptr - begin));
   }
 
   MaskInfo& operator+=(int64_t jump) {
