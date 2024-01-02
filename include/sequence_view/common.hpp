@@ -64,8 +64,8 @@ struct MaskInfo {
 
   MaskInfo(const std::vector<uint8_t>& span)
       : ptr(&*span.begin()),
-        begin(&*span.begin()),
-        end(&*span.end()),
+        begin(ptr),
+        end(ptr + span.size()),
         cnt(static_cast<uint64_t>(
             std::count(span.begin(), span.end(), MASK_TRUE))),
         valid_until(init_valid(span)) {}
@@ -295,7 +295,10 @@ class View {
                       static_cast<uint64_t>(rng._stop - rng._start), rng._step);
   }
 
-  View operator()(const std::vector<uint8_t>& mask) { return View(_ptr, mask); }
+  View operator()(const std::vector<uint8_t>& mask) {
+    if (_size < mask.size()) return View(_ptr, 0);
+    return View(_ptr, mask);
+  }
 
   reference operator[](uint64_t idx) { return *element_at(idx); }
 
