@@ -306,7 +306,7 @@ class View {
     mask.resize(view.size());
     uint64_t idx = 0;
     for (const auto& elem : view)
-      mask[idx++] = elem < val ? MASK_TRUE : MASK_FALSE;
+      mask.at(idx++) = elem < val ? MASK_TRUE : MASK_FALSE;
     return mask;
   }
 
