@@ -4,7 +4,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
     cmake_policy(SET CMP0135 NEW)
 endif()
 
-project(sequence_view VERSION 0.1 LANGUAGES CXX)
+project(sequence_view VERSION 0.1 LANGUAGES C CXX)
 option(DEVELOPER_BUILD "Enable developer mode" OFF)
 option(SEQUENCE_VIEW_ENABLE_TESTS "Enable test build" ON)
 
@@ -77,7 +77,7 @@ if(DEVELOPER_BUILD)
         ${GCC_WARNINGS}
     )
 
-    target_link_libraries(io_dev INTERFACE 
+    target_link_libraries(sequence_view INTERFACE 
         ${PROJECT_NAME}_project_options 
         ${PROJECT_NAME}_project_warnings
     )
