@@ -12,14 +12,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
-include(FetchContent)
-
-FetchContent_Declare(
-    _project_options
-    URL https://github.com/aminya/project_options/archive/refs/tags/v0.33.0.zip
-)
-FetchContent_MakeAvailable(_project_options)
-
 add_library(sequence_view INTERFACE)
 target_sources(sequence_view INTERFACE
     include/sequence_view/common.hpp
@@ -27,6 +19,13 @@ target_sources(sequence_view INTERFACE
 target_include_directories(sequence_view INTERFACE include)
 
 if(DEVELOPER_BUILD)
+    include(FetchContent)
+    FetchContent_Declare(
+        _project_options
+        URL https://github.com/aminya/project_options/archive/refs/tags/v0.33.0.zip
+    )
+    FetchContent_MakeAvailable(_project_options)
+
     set(ENABLE_CPPCHECK "ENABLE_CPPCHECK")
     if(NOT CXX_CPPCHECK)
         set(ENABLE_CPPCHECK "")
