@@ -15,7 +15,7 @@ static void init_range(uint64_t* ptr, uint64_t len) {
   std::iota(ptr, ptr + len, 0);
 }
 
-TEST(ViewHelpers, ValidateStep) {
+TEST(View, ValidateStep) {
   std::vector<int64_t> input{-2, -1, 0, 1, 2};
   std::vector<int64_t> expected{-2, -1, 1, 1, 2};
 
@@ -25,7 +25,7 @@ TEST(ViewHelpers, ValidateStep) {
         << fmt::format("Failed for {}", input[idx]);
 }
 
-TEST(ViewHelpers, Elements) {
+TEST(View, Elements) {
   std::vector<uint64_t> input_size{0, 0,  1,  1,  9, 10, 11, 12, 13,
                                    9, 10, 11, 12, 9, 9,  10, 11, 12};
   std::vector<int64_t> input_step{0, 1, 1, 2, 3,  3,  3,  3,  3,
@@ -40,7 +40,7 @@ TEST(ViewHelpers, Elements) {
         << fmt::format("Failed for {}/{}", input_size[idx], input_step[idx]);
 }
 
-TEST(ViewHelpers, LastPtr) {
+TEST(View, LastPtr) {
   uint16_t data = 0;
   auto ptr = &data;
   auto PC = [=](uint16_t value) { return ptr + value; };
@@ -62,7 +62,7 @@ TEST(ViewHelpers, LastPtr) {
   }
 }
 
-TEST(ViewHelpers, BasePtr) {
+TEST(View, BasePtr) {
   uint16_t data = 0;
   auto ptr = &data;
   auto PC = [=](uint16_t value) { return ptr + value; };
@@ -84,7 +84,7 @@ TEST(ViewHelpers, BasePtr) {
   }
 }
 
-TEST(ViewHelpers, EndPtr) {
+TEST(View, EndPtr) {
   uint16_t data = 0;
   auto ptr = &data;
   auto PC = [=](uint16_t value) { return ptr + value; };
@@ -106,69 +106,69 @@ TEST(ViewHelpers, EndPtr) {
   }
 }
 
-TEST(Common, MakeRange) {
+TEST(Range, MakeRange) {
   SeqView::Range rng(12, 23, 2);
   EXPECT_THAT(rng.start(), Eq(12));
   EXPECT_THAT(rng.stop(), Eq(23));
   EXPECT_THAT(rng.step(), Eq(2));
 }
 
-TEST(Common, MakeRangeReversedArgs) {
+TEST(Range, MakeRangeReversedArgs) {
   SeqView::Range rng(23, 12, 2);
   EXPECT_THAT(rng.start(), Eq(12));
   EXPECT_THAT(rng.stop(), Eq(23));
   EXPECT_THAT(rng.step(), Eq(2));
 }
 
-TEST(Common, MakeRangeDefaultStep) {
+TEST(Range, MakeRangeDefaultStep) {
   SeqView::Range rng(12, 23);
   EXPECT_THAT(rng.start(), Eq(12));
   EXPECT_THAT(rng.stop(), Eq(23));
   EXPECT_THAT(rng.step(), Eq(SeqView::STEP));
 }
 
-TEST(Common, MakeStartRange) {
+TEST(Range, MakeStartRange) {
   SeqView::StartRange rng(12, 2);
   EXPECT_THAT(rng.start(), Eq(12));
   EXPECT_THAT(rng.stop(), Eq(SeqView::END));
   EXPECT_THAT(rng.step(), Eq(2));
 }
 
-TEST(Common, MakeStartRangeDefaultStep) {
+TEST(Range, MakeStartRangeDefaultStep) {
   SeqView::StartRange rng(12);
   EXPECT_THAT(rng.start(), Eq(12));
   EXPECT_THAT(rng.stop(), Eq(SeqView::END));
   EXPECT_THAT(rng.step(), Eq(SeqView::STEP));
 }
 
-TEST(Common, MakeStopRange) {
+TEST(Range, MakeStopRange) {
   SeqView::StopRange rng(12, 2);
   EXPECT_THAT(rng.start(), Eq(SeqView::START));
   EXPECT_THAT(rng.stop(), Eq(12));
   EXPECT_THAT(rng.step(), Eq(2));
 }
 
-TEST(Common, MakeStopRangeDefaultStep) {
+TEST(Range, MakeStopRangeDefaultStep) {
   SeqView::StopRange rng(12);
   EXPECT_THAT(rng.start(), Eq(SeqView::START));
   EXPECT_THAT(rng.stop(), Eq(12));
   EXPECT_THAT(rng.step(), Eq(SeqView::STEP));
 }
 
-TEST(Common, MakeStepRange) {
+TEST(Range, MakeStepRange) {
   SeqView::StepRange rng(2);
   EXPECT_THAT(rng.start(), Eq(SeqView::START));
   EXPECT_THAT(rng.stop(), Eq(SeqView::END));
   EXPECT_THAT(rng.step(), Eq(2));
 }
 
-TEST(Common, Make1DView) {
+TEST(View, Make1DView) {
   uint64_t data[100];
   SeqView::View view(data, 100);
   EXPECT_THAT(view, SizeIs(100));
 }
 
-TEST(Common, IterateAssignOver1DView) {
+TEST(View, IterateAssignOver1DView) {
   uint64_t data[100];
   SeqView::View view(data, 100);
   uint64_t num = 0;
@@ -176,14 +176,14 @@ TEST(Common, IterateAssignOver1DView) {
   EXPECT_THAT(view, ElementsAreArray(data, 100));
 }
 
-TEST(Common, Make1DSubView) {
+TEST(View, Make1DSubView) {
   uint64_t data[100];
   SeqView::View view(data, 100);
   auto sub = view(SeqView::Range{10, 20, 2});
   EXPECT_THAT(sub, SizeIs(5));
 }
 
-TEST(Common, IterateWithStep) {
+TEST(View, IterateWithStep) {
   uint64_t data[100];
   init_range(data, 100);
   SeqView::View view(data, 100);
@@ -194,7 +194,7 @@ TEST(Common, IterateWithStep) {
   }
 }
 
-TEST(Common, IterateWithNegativeStep) {
+TEST(View, IterateWithNegativeStep) {
   uint64_t data[100];
   init_range(data, 100);
   SeqView::View view(data, 100);
@@ -205,7 +205,7 @@ TEST(Common, IterateWithNegativeStep) {
   }
 }
 
-TEST(Common, ForEachLoop) {
+TEST(View, ForEachLoop) {
   uint64_t data[100];
   init_range(data, 100);
   SeqView::View view(data, 100);
@@ -218,7 +218,7 @@ TEST(Common, ForEachLoop) {
   }
 }
 
-TEST(Common, ForEachLoopReversed) {
+TEST(View, ForEachLoopReversed) {
   uint64_t data[100];
   init_range(data, 100);
   SeqView::View view(data, 100);
@@ -231,7 +231,7 @@ TEST(Common, ForEachLoopReversed) {
   }
 }
 
-TEST(Common, CheckStlSort) {
+TEST(View, CheckStlSort) {
   uint64_t data[] = {3, 6, 1, 5, 4, 3, 5, 1};
   uint64_t expected[] = {5, 6, 4, 5, 3, 3, 1, 1};
   EXPECT_FALSE(std::is_sorted(std::begin(data), std::end(data)));
@@ -250,14 +250,14 @@ TEST(Common, CheckStlSort) {
   }
 }
 
-TEST(Common, CheckStlMaxElem) {
+TEST(View, MaxElem) {
   uint64_t data[] = {3, 6, 1, 5, 4, 3, 5, 1};
   SeqView::View view(data, 8);
   auto sub = view(SeqView::Range{0, 8, -2});
   EXPECT_THAT(*std::max_element(std::begin(sub), std::end(sub)), Eq(5));
 }
 
-TEST(Common, CheckStlAllOfAnyOfNoneOf) {
+TEST(View, AllOfAnyOfNoneOf) {
   uint64_t data[] = {3, 6, 1, 4, 5, 2, 5, 0};
   SeqView::View view(data, 8);
   {
@@ -277,7 +277,7 @@ TEST(Common, CheckStlAllOfAnyOfNoneOf) {
   }
 }
 
-TEST(Common, CheckStlStablePartition) {
+TEST(StlAlgo, StablePartition) {
   uint64_t data[] = {3, 6, 1, 5, 4, 3, 5, 1};
   uint64_t expected[] = {3, 3, 1, 1, 4, 6, 5, 5};
   SeqView::View view(data, 8);
@@ -290,7 +290,7 @@ TEST(Common, CheckStlStablePartition) {
   }
 }
 
-TEST(Common, CheckStlFind) {
+TEST(StlAlgo, Find) {
   uint64_t data[] = {3, 6, 1, 5, 4, 3, 5, 1};
   SeqView::View view(data, 8);
   auto sub = view(SeqView::Range{0, 8, 2});
@@ -302,7 +302,7 @@ TEST(Common, CheckStlFind) {
               Eq(4));
 }
 
-TEST(Common, CheckStlCount) {
+TEST(StlAlgo, CheckStlCount) {
   uint64_t data[] = {3, 6, 1, 5, 4, 3, 5, 1};
   SeqView::View view(data, 8);
   auto sub = view(SeqView::Range{0, 8, 2});
