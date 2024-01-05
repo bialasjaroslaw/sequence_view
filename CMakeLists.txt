@@ -14,7 +14,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_library(sequence_view INTERFACE)
 target_sources(sequence_view INTERFACE
-    include/sequence_view/common.hpp
+    include/sequence_view/base-iterator.hpp
+    include/sequence_view/mask.hpp
+    include/sequence_view/range.hpp
+    include/sequence_view/view.hpp
 )
 target_include_directories(sequence_view INTERFACE include)
 
