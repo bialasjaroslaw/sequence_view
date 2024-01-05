@@ -109,8 +109,10 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     add_executable(main 
-        common.cc
         mask.cc
+        range.cc
+        stl.cc
+        view.cc
     )
 
     FetchContent_Declare(

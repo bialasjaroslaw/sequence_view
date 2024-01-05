@@ -48,10 +48,12 @@ TEST(SubView, SubViewWithMask) {
 }
 
 TEST(SubView, SubViewWithIteratorsAndMask) {
+  using namespace SeqView;
   uint64_t data[] = {1, 3, 7, 5, 4, 2, 1, 3, 6, 8};
   // uint64_t expected[] = {1, 3, 4, 2, 1, 3};
-  std::vector<uint8_t> mask{true, true, false, false, true,
-                            true, true, true,  false, false};
+  std::vector<uint8_t> mask{MASK_TRUE,  MASK_TRUE, MASK_FALSE, MASK_FALSE,
+                            MASK_TRUE,  MASK_TRUE, MASK_TRUE,  MASK_TRUE,
+                            MASK_FALSE, MASK_FALSE};
   SeqView::View view(data, 10);
   auto sub = view(mask);
   // EXPECT_THAT(sub.size(), Eq(6));
