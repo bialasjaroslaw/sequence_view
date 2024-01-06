@@ -91,6 +91,11 @@ if(DEVELOPER_BUILD)
         ${PROJECT_NAME}_project_options 
         ${PROJECT_NAME}_project_warnings
     )
+
+    if(${ENABLE_COVERAGE})
+        include(Coverage.cmake)
+        add_coverage(TARGET ${PROJECT_NAME} IGNORE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/tests/*)
+    endif()
 endif()
 
 if(SEQUENCE_VIEW_ENABLE_TESTS)
@@ -109,11 +114,11 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     add_executable(main 
-        base.cc
-        mask.cc
-        range.cc
-        stl.cc
-        view.cc
+        tests/base.cc
+        tests/mask.cc
+        tests/range.cc
+        tests/stl.cc
+        tests/view.cc
     )
 
     FetchContent_Declare(
