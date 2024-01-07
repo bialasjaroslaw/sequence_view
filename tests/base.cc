@@ -19,6 +19,9 @@ TEST(Iterator, ComparisonChecksOfTwoDifferentIterators) {
   auto end = SeqView::BaseIterator(array + 2);
   EXPECT_THAT(begin, Ne(end));
   EXPECT_THAT(begin, Lt(end));
+  EXPECT_THAT(begin, Le(end));
+  EXPECT_THAT(end, Ge(begin));
+  EXPECT_THAT(end, Gt(begin));
 }
 
 TEST(Iterator, PostIncrement) {
@@ -95,4 +98,71 @@ TEST(Iterator, PreDecrement) {
   EXPECT_THAT(it, Ne(end));
   EXPECT_THAT(it, Lt(end));
   EXPECT_THAT(it, Eq(begin));
+}
+
+TEST(Iterator, PlusEqual) {
+  int array[2];
+  auto begin = SeqView::BaseIterator(array);
+  auto end = SeqView::BaseIterator(array + 2);
+
+  auto it = begin;
+  it += 1;
+  EXPECT_THAT(it, Lt(end));
+  it = begin;
+  it += 2;
+  EXPECT_THAT(it, Eq(end));
+  it = begin;
+  it += 3;
+  EXPECT_THAT(it, Gt(end));
+}
+
+TEST(Iterator, MinusEqual) {
+  int array[2];
+  auto begin = SeqView::BaseIterator(array);
+  auto end = SeqView::BaseIterator(array + 2);
+
+  auto it = end;
+  it -= 1;
+  EXPECT_THAT(it, Gt(begin));
+  it = end;
+  it -= 2;
+  EXPECT_THAT(it, Eq(begin));
+  it = end;
+  it -= 3;
+  EXPECT_THAT(it, Lt(begin));
+}
+
+TEST(Iterator, PlusCopy) {
+  int array[2];
+  auto begin = SeqView::BaseIterator(array);
+  auto end = SeqView::BaseIterator(array + 2);
+
+  auto it = begin + 2;
+  EXPECT_THAT(it, Eq(end));
+}
+
+TEST(Iterator, ValuePlusCopy) {
+  int array[2];
+  auto begin = SeqView::BaseIterator(array);
+  auto end = SeqView::BaseIterator(array + 2);
+
+  auto it = 2 + begin;
+  EXPECT_THAT(it, Eq(end));
+}
+
+TEST(Iterator, MinusCopy) {
+  int array[2];
+  auto begin = SeqView::BaseIterator(array);
+  auto end = SeqView::BaseIterator(array + 2);
+
+  auto it = end - 2;
+  EXPECT_THAT(it, Eq(begin));
+}
+
+TEST(Iterator, BracketOperator) {
+  int array[] = {13, 22, 18, 44, 22};
+  auto it = SeqView::BaseIterator(array);
+  it += 2;
+
+  for (int idx = 0; idx < 2; ++idx) EXPECT_THAT(it[idx], Eq(array[idx + 2]));
 }
