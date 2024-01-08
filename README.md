@@ -7,6 +7,7 @@ Goal is to be able to access data in such easy way like a NumPy array allows to.
 
 ## Future work
 * [X] Simple view for 1D sequence
+* [X] Fully test 1D sequences with mask support
 * [ ] Simple view for 2D sequence
 * [ ] Add support for arithmetic, boolean operations
 * [X] Add range - begin/end
