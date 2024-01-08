@@ -160,9 +160,34 @@ TEST(Iterator, MinusCopy) {
 }
 
 TEST(Iterator, BracketOperator) {
-  int array[] = {13, 22, 18, 44, 22};
+  int array[] = {13, 22, 18, 44, 15};
   auto it = SeqView::BaseIterator(array);
   it += 2;
-
   for (int idx = 0; idx < 2; ++idx) EXPECT_THAT(it[idx], Eq(array[idx + 2]));
+}
+
+TEST(Iterator, WithMaskForward) {
+  int array[] = {13, 22, 18, 44, 15};
+  std::vector<uint8_t> mask{true, true, false, false, true};
+  auto begin = SeqView::BaseIterator(array, SeqView::MASK, mask);
+  auto end = begin + 3;
+  auto it = begin;
+  EXPECT_THAT(it, Eq(begin));
+  EXPECT_THAT(*it++, Eq(13));
+  EXPECT_THAT(*it++, Eq(22));
+  EXPECT_THAT(*it++, Eq(15));
+  EXPECT_THAT(it, Eq(end));
+}
+
+TEST(Iterator, WithMaskBackward) {
+  int array[] = {13, 22, 18, 44, 15};
+  std::vector<uint8_t> mask{true, true, false, false, true};
+  auto begin = SeqView::BaseIterator(array, SeqView::MASK, mask);
+  auto end = begin + 3;
+  auto it = end;
+  EXPECT_THAT(it, Eq(end));
+  EXPECT_THAT(*--it, Eq(15));
+  EXPECT_THAT(*--it, Eq(22));
+  EXPECT_THAT(*--it, Eq(13));
+  EXPECT_THAT(it, Eq(begin));
 }
