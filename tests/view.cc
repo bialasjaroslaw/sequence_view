@@ -174,3 +174,26 @@ TEST(View, ForEachLoopReversed) {
     idx -= 2;
   }
 }
+
+TEST(View, AssignSingleValue) {
+  uint64_t array[] = {13, 22, 18, 44, 15};
+  SeqView::View view(array, 5);
+  view = 13;
+  for (auto& elem : view) {
+    EXPECT_THAT(elem, Eq(13));
+  }
+}
+
+TEST(View, CascadeAssignSingleValue) {
+  uint64_t array[] = {13, 22, 18, 44, 15};
+  uint64_t other[] = {13, 22, 18, 44, 15};
+  SeqView::View view(array, 5);
+  SeqView::View view_other(other, 5);
+  view_other = view = 13;
+  for (auto& elem : view) {
+    EXPECT_THAT(elem, Eq(13));
+  }
+  for (auto& elem : view_other) {
+    EXPECT_THAT(elem, Eq(13));
+  }
+}

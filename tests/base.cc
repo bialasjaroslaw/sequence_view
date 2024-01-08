@@ -10,11 +10,12 @@
 using namespace ::testing;
 
 TEST(Iterator, DefaultCtor) {
-  EXPECT_THAT(SeqView::BaseIterator<int>(), Eq(SeqView::BaseIterator<int>()));
+  EXPECT_THAT(SeqView::BaseIterator<uint64_t>(),
+              Eq(SeqView::BaseIterator<uint64_t>()));
 }
 
 TEST(Iterator, ComparisonChecksOfTwoDifferentIterators) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
   EXPECT_THAT(begin, Ne(end));
@@ -25,7 +26,7 @@ TEST(Iterator, ComparisonChecksOfTwoDifferentIterators) {
 }
 
 TEST(Iterator, PostIncrement) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
   auto it = begin;
@@ -44,7 +45,7 @@ TEST(Iterator, PostIncrement) {
 }
 
 TEST(Iterator, PreIncrement) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
   auto it = begin;
@@ -63,7 +64,7 @@ TEST(Iterator, PreIncrement) {
 }
 
 TEST(Iterator, PostDecrement) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
   auto it = end;
@@ -82,7 +83,7 @@ TEST(Iterator, PostDecrement) {
 }
 
 TEST(Iterator, PreDecrement) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
   auto it = end;
@@ -101,7 +102,7 @@ TEST(Iterator, PreDecrement) {
 }
 
 TEST(Iterator, PlusEqual) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
 
@@ -117,7 +118,7 @@ TEST(Iterator, PlusEqual) {
 }
 
 TEST(Iterator, MinusEqual) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
 
@@ -133,7 +134,7 @@ TEST(Iterator, MinusEqual) {
 }
 
 TEST(Iterator, PlusCopy) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
 
@@ -142,7 +143,7 @@ TEST(Iterator, PlusCopy) {
 }
 
 TEST(Iterator, ValuePlusCopy) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
 
@@ -151,7 +152,7 @@ TEST(Iterator, ValuePlusCopy) {
 }
 
 TEST(Iterator, MinusCopy) {
-  int array[2];
+  uint64_t array[2];
   auto begin = SeqView::BaseIterator(array);
   auto end = SeqView::BaseIterator(array + 2);
 
@@ -160,14 +161,14 @@ TEST(Iterator, MinusCopy) {
 }
 
 TEST(Iterator, BracketOperator) {
-  int array[] = {13, 22, 18, 44, 15};
+  uint64_t array[] = {13, 22, 18, 44, 15};
   auto it = SeqView::BaseIterator(array);
   it += 2;
   for (int idx = 0; idx < 2; ++idx) EXPECT_THAT(it[idx], Eq(array[idx + 2]));
 }
 
 TEST(Iterator, WithMaskForward) {
-  int array[] = {13, 22, 18, 44, 15};
+  uint64_t array[] = {13, 22, 18, 44, 15};
   std::vector<uint8_t> mask{true, true, false, false, true};
   auto begin = SeqView::BaseIterator(array, SeqView::MASK, mask);
   auto end = begin + 3;
@@ -180,7 +181,7 @@ TEST(Iterator, WithMaskForward) {
 }
 
 TEST(Iterator, WithMaskBackward) {
-  int array[] = {13, 22, 18, 44, 15};
+  uint64_t array[] = {13, 22, 18, 44, 15};
   std::vector<uint8_t> mask{true, true, false, false, true};
   auto begin = SeqView::BaseIterator(array, SeqView::MASK, mask);
   auto end = begin + 3;

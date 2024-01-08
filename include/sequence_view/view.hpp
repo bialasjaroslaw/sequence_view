@@ -98,6 +98,12 @@ class View {
     return mask;
   }
 
+  const T& operator=(const T& value) {
+    auto p = _ptr;
+    while (p != _end) *p++ = value;
+    return value;
+  }
+
  protected:
   T* element_at(uint64_t idx) const {
     if (_step == MASK) {
