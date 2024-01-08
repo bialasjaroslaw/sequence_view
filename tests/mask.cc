@@ -30,37 +30,36 @@ TEST(SubView, CheckValidUntil) {
 
   SeqView::View view(data, 10);
   auto mask = view < 5;
-  // SeqView::MaskInfo info(mask);
-  // EXPECT_THAT(info.valid_until, ContainerEq(expected));
+  SeqView::MaskInfo info(mask);
+  EXPECT_THAT(info.valid_until, ContainerEq(expected));
 }
 
 TEST(SubView, SubViewWithMask) {
   uint64_t data[] = {1, 3, 7, 5, 4, 2, 1, 3, 6, 8};
-  // uint64_t expected[] = {1, 3, 4, 2, 1, 3};
+  uint64_t expected[] = {1, 3, 4, 2, 1, 3};
   std::vector<uint8_t> mask{true, true, false, false, true,
                             true, true, true,  false, false};
   SeqView::View view(data, 10);
-  // auto sub = view(mask);
-  // EXPECT_THAT(sub.size(), Eq(6));
-  // for (auto idx = 0U; idx < sub.size(); ++idx)
-  //   EXPECT_THAT(sub[idx], Eq(expected[idx]))
-  //       << fmt::format("Failed for idx {}", idx);
+  auto sub = view(mask);
+  EXPECT_THAT(sub.size(), Eq(6));
+  for (auto idx = 0U; idx < sub.size(); ++idx)
+    EXPECT_THAT(sub[idx], Eq(expected[idx]))
+        << fmt::format("Failed for idx {}", idx);
 }
 
 TEST(SubView, SubViewWithIteratorsAndMask) {
   using namespace SeqView;
   uint64_t data[] = {1, 3, 7, 5, 4, 2, 1, 3, 6, 8};
-  // uint64_t expected[] = {1, 3, 4, 2, 1, 3};
-  std::vector<uint8_t> mask{MASK_TRUE,  MASK_TRUE, MASK_FALSE, MASK_FALSE,
-                            MASK_TRUE,  MASK_TRUE, MASK_TRUE,  MASK_TRUE,
-                            MASK_FALSE, MASK_FALSE};
+  uint64_t expected[] = {1, 3, 4, 2, 1, 3};
+  std::vector<uint8_t> mask{true, true, false, false, true,
+                            true, true, true,  false, false};
   SeqView::View view(data, 10);
   auto sub = view(mask);
-  // EXPECT_THAT(sub.size(), Eq(6));
-  // EXPECT_THAT(sub.end() - sub.begin(), Eq(6));
-  // uint64_t idx = 0;
-  // for (auto it = sub.begin(); it != sub.end(); ++it, ++idx) {
-  //   EXPECT_THAT(*it, Eq(expected[idx]))
-  //       << fmt::format("Failed for idx {}", idx);
-  // }
+  EXPECT_THAT(sub.size(), Eq(6));
+  EXPECT_THAT(sub.end() - sub.begin(), Eq(6));
+  uint64_t idx = 0;
+  for (auto it = sub.begin(); it != sub.end(); ++it, ++idx) {
+    EXPECT_THAT(*it, Eq(expected[idx]))
+        << fmt::format("Failed for idx {}", idx);
+  }
 }
