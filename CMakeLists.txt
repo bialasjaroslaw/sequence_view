@@ -91,11 +91,6 @@ if(DEVELOPER_BUILD)
         ${PROJECT_NAME}_project_options 
         ${PROJECT_NAME}_project_warnings
     )
-
-    if(${ENABLE_COVERAGE})
-        include(Coverage.cmake)
-        add_coverage(TARGET ${PROJECT_NAME} IGNORE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/tests/*)
-    endif()
 endif()
 
 if(SEQUENCE_VIEW_ENABLE_TESTS)
@@ -130,4 +125,12 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
 
     target_link_libraries(main PRIVATE sequence_view gtest_main gmock fmt)
     gtest_discover_tests(main)
+
+    if(${ENABLE_COVERAGE})
+        include(Coverage.cmake)
+        check_coverage(CAN_ENABLE_COVERAGE)
+        if(CAN_ENABLE_COVERAGE)
+            add_coverage(TARGET main IGNORE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/tests/*)
+        endif()
+    endif()
 endif()
