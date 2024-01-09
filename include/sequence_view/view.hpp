@@ -104,6 +104,16 @@ class View {
     return value;
   }
 
+  const View& operator=(const View& value) {
+    // TODO throw?
+    if (value.size() == size()) {
+      auto p = _ptr;
+      auto r = value._ptr;
+      while (p != _end) *p++ = *r++;
+    }
+    return value;
+  }
+
  protected:
   T* element_at(uint64_t idx) const {
     if (_step == MASK) {

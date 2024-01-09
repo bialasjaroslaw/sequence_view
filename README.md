@@ -10,6 +10,7 @@ Goal is to be able to access data in such easy way like a NumPy array allows to.
 * [X] Fully test 1D sequences with mask support
 * [ ] Simple view for 2D sequence
 * [ ] Add support for arithmetic, boolean operations
+* [ ] Auto-deduce view size from c-style array
 * [X] Add range - begin/end
 * [X] Add support for STL algorithms
 * [X] Allow for subviews

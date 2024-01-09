@@ -197,3 +197,68 @@ TEST(View, CascadeAssignSingleValue) {
     EXPECT_THAT(elem, Eq(13));
   }
 }
+
+TEST(View, AssignView) {
+  uint64_t array_r[] = {11, 14, 1, 2, 33};
+  uint64_t array_l[] = {13, 22, 18, 44, 15};
+  uint64_t expected[] = {11, 14, 1, 2, 33};
+  SeqView::View view_l(array_l, 5);
+  SeqView::View view_r(array_r, 5);
+  view_l = view_r;
+  auto idx = 0U;
+  for (auto& elem : view_l) {
+    EXPECT_THAT(elem, Eq(expected[idx++]));
+  }
+}
+
+TEST(View, AssignViewDifferentSize) {
+  uint64_t array_r[] = {11, 14, 1, 2};
+  uint64_t array_l[] = {13, 22, 18, 44, 15};
+  uint64_t expected[] = {13, 22, 18, 44, 15};
+  SeqView::View view_l(array_l, 5);
+  SeqView::View view_r(array_r, 4);
+  view_l = view_r;
+  auto idx = 0U;
+  for (auto& elem : view_l) {
+    EXPECT_THAT(elem, Eq(expected[idx++]));
+  }
+}
+
+TEST(View, CascadeAssignView) {
+  uint64_t array_r[] = {11, 14, 1, 2, 11};
+  uint64_t array_l[] = {13, 22, 18, 44, 15};
+  uint64_t array_f[] = {13, 22, 18, 44, 15};
+  uint64_t expected[] = {11, 14, 1, 2, 11};
+  SeqView::View view(array_r, 5);
+  SeqView::View view_other(array_l, 5);
+  SeqView::View view_front(array_f, 5);
+  view_front = view_other = view;
+  auto idx = 0U;
+  for (auto& elem : view_other) {
+    EXPECT_THAT(elem, Eq(expected[idx++]));
+  }
+  idx = 0U;
+  for (auto& elem : view_front) {
+    EXPECT_THAT(elem, Eq(expected[idx++]));
+  }
+}
+
+TEST(View, CascadeAssignViewDifferentSize) {
+  uint64_t array_r[] = {11, 14, 1, 2, 11};
+  uint64_t array_l[] = {13, 22, 18, 44};
+  uint64_t array_f[] = {13, 22, 18, 44, 15};
+  uint64_t expected[] = {11, 14, 1, 2, 11};
+  uint64_t expected_unchanged[] = {13, 22, 18, 44};
+  SeqView::View view(array_r, 5);
+  SeqView::View view_other(array_l, 4);
+  SeqView::View view_front(array_f, 5);
+  view_front = view_other = view;
+  auto idx = 0U;
+  for (auto& elem : view_front) {
+    EXPECT_THAT(elem, Eq(expected[idx++]));
+  }
+  idx = 0U;
+  for (auto& elem : view_other) {
+    EXPECT_THAT(elem, Eq(expected_unchanged[idx++]));
+  }
+}
