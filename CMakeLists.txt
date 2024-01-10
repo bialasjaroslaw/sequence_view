@@ -23,7 +23,7 @@ target_include_directories(sequence_view INTERFACE include)
 
 include(Packages.cmake)
 # For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_dependency(
     NAME GTest 
     REPO https://github.com/google/googletest.git
@@ -114,8 +114,8 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
     #     GIT_REPOSITORY https://github.com/google/googletest.git
     #     GIT_TAG        58d77fa8070e8cec2dc1ed015d66b454c8d78850 # release-1.12.1
     # )
-    # # For Windows: Prevent overriding the parent project's compiler/linker settings
-    # set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(GTest)
     # use_dependency(GTest)
     use_dependency(fmt)
