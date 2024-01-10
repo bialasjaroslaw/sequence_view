@@ -115,8 +115,8 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
         GIT_TAG        58d77fa8070e8cec2dc1ed015d66b454c8d78850 # release-1.12.1
     )
     # For Windows: Prevent overriding the parent project's compiler/linker settings
-    FetchContent_MakeAvailable(GTest)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(GTest)
     # use_dependency(GTest)
     use_dependency(fmt)
 
