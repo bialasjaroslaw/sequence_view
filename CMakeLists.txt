@@ -24,7 +24,8 @@ target_include_directories(sequence_view INTERFACE include)
 include(Packages.cmake)
 add_dependency(
     NAME GTest 
-    URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
+    REPO https://github.com/google/googletest.git
+    HASH 58d77fa8070e8cec2dc1ed015d66b454c8d78850
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
