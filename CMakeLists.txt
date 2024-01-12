@@ -11,7 +11,6 @@ option(SEQUENCE_VIEW_ENABLE_TESTS "Enable test build" ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_COMPILER_LAUNCHER distcc)
 
 add_library(sequence_view INTERFACE)
 target_sources(sequence_view INTERFACE
@@ -77,7 +76,7 @@ if(DEVELOPER_BUILD)
     include(${_project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
     project_options(
         PREFIX ${PROJECT_NAME}
-        # ENABLE_CACHE
+        ENABLE_CACHE
         ${ENABLE_CPPCHECK}
         ${ENABLE_CLANG_TIDY}
         ${ENABLE_SANITIZER_ADDRESS}
