@@ -11,6 +11,7 @@ option(SEQUENCE_VIEW_ENABLE_TESTS "Enable test build" ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_COMPILER_LAUNCHER distcc)
 
 add_library(sequence_view INTERFACE)
 target_sources(sequence_view INTERFACE
@@ -76,7 +77,7 @@ if(DEVELOPER_BUILD)
     include(${_project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
     project_options(
         PREFIX ${PROJECT_NAME}
-        ENABLE_CACHE
+        # ENABLE_CACHE
         ${ENABLE_CPPCHECK}
         ${ENABLE_CLANG_TIDY}
         ${ENABLE_SANITIZER_ADDRESS}
@@ -103,13 +104,13 @@ if(SEQUENCE_VIEW_ENABLE_TESTS)
 
     enable_testing()
     FetchContent_Declare(
-        googletest
+        gtest
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG        58d77fa8070e8cec2dc1ed015d66b454c8d78850 # release-1.12.1
     )
     # For Windows: Prevent overriding the parent project's compiler/linker settings
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
+    FetchContent_MakeAvailable(gtest)
     use_dependency(fmt)
 
     add_executable(main 
